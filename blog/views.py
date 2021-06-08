@@ -5,10 +5,12 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 
 from .forms import LoginForm, SignUpForm
+from .models import Post
 
 # Home
 def home(request):
-    return render(request, 'blog/home.html')
+    posts = Post.objects.all()
+    return render(request, 'blog/home.html', {'posts':posts})
 
 # About
 def about(request):
