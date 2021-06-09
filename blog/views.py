@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 
-from .forms import LoginForm, SignUpForm
+from .forms import LoginForm, SignUpForm, PostForm
 from .models import Post
 
 # Home
@@ -62,3 +62,46 @@ def user_login(request):
         return render(request, 'blog/login.html', {'form':form})
     else:
         return redirect('dashboard')
+
+# Add New Post
+def add_post(request):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            form = PostForm(request.POST)
+            if form.is_valid():
+                title = form.cleaned_data['title']
+                desc = form.cleaned_data['desc']
+                post = Post(title=title, desc=desc)
+                post.save()
+                return redirect('dashboard')
+        else:
+            form = PostForm()
+        return render(request, 'core/addpost.html', {'form':form})
+    else:
+        return redirect('login')
+
+# Update Post
+def update_post(request, id):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            pi = Post.objects.get(pk=id)
+            form = PostForm(request.POST, instance=pi)
+            if form.is_valid():
+                form.save()
+                return redirect('dashboard')
+        else:
+            pi = Post.objects.get(pk=id)
+            form = PostForm(instance=pi)
+        return render(request, 'core/updatepost.html', {'form':form})
+    else:
+        return redirect('login')
+
+# Delete Post
+def delete_post(request, id):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            pi = Post.objects.get(pk=id)
+            pi.delete()
+            return redirect('dashboard')
+    else:
+        return redirect('login')
